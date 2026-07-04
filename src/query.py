@@ -1,10 +1,6 @@
-import os
-from dotenv import load_dotenv
-from google import genai
 from google.genai import types
 
-
-STORE_NAME = "fileSearchStores/knowledgesyncoptibot-kv5mwqorazi4"
+from gemini_store import create_client, get_store_name
 
 
 SYSTEM_PROMPT = """
@@ -17,9 +13,8 @@ You are OptiBot, the customer-support bot for OptiSigns.com.
 
 
 def main():
-    load_dotenv()
-
-    client = genai.Client(api_key=os.getenv("API_KEY"))
+    client = create_client()
+    store_name = get_store_name()
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -29,7 +24,7 @@ def main():
             tools=[
                 types.Tool(
                     file_search=types.FileSearch(
-                        file_search_store_names=[STORE_NAME]
+                        file_search_store_names=[store_name]
                     )
                 )
             ],
