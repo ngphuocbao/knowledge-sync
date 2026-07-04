@@ -15,6 +15,8 @@ from markdownify import markdownify as md
 import re
 from pathlib import Path
 
+from bs4 import BeautifulSoup
+
 # Zendesk Help Center API endpoint.
 # "{}" will be replaced by the current page number.
 BASE_URL = "https://support.optisigns.com/api/v2/help_center/en-us/articles.json?page={}"
@@ -69,8 +71,23 @@ def convert_to_markdown(article):
     article_url = article["html_url"]
     body = article["body"]
 
+    # Remove embedded Base64 images before Markdown conversion.
+    soup = BeautifulSoup(body, "html.parser")
+    for image in soup.find_all("img"):
+        src = image.get("src", "")
+
+        if src.startswith("data:image/"):
+            alt = image.get("alt", "").strip()
+
+            if alt:
+                replacement = f"[Embedded image removed: {alt}]"
+            else:
+                replacement = "[Embedded image removed]"
+
+            image.replace_with(replacement)
+
     markdown_body = md(
-        body,
+        str(soup),
         heading_style="ATX",
         bullets="-",
     )
