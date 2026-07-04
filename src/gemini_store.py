@@ -34,6 +34,7 @@ def create_client():
     """
     Create a Gemini API client using the configured API key.
     """
+    load_dotenv()
     api_key = os.getenv("API_KEY")
 
     if not api_key:
